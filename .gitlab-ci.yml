@@ -51,7 +51,7 @@ dependency-check:
   artifacts:
     expire_in: 1 day
     reports:
-      sast: target/gl-sast-sonar-report.json
+      sast: target/dependency-check-report.json
 
 # scan dockerfile:
 #   stage: scan dockerfile
