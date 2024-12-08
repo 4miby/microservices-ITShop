@@ -44,6 +44,7 @@ sonarqube-check frontend:
   image: node:18-alpine
   script:
     - cd frontend 
+    - npm install
     - sonar-scanner -Dsonar.projectKey="frontend" -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_TOKEN
     - cd ..
   allow_failure: true
