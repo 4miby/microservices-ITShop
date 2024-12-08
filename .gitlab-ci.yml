@@ -41,12 +41,7 @@ variables:
 
 sonarqube-check frontend:
   stage: sonarqube-check
-  image: node:18-alpine
-  before_script:
-    - apk add --no-cache curl openjdk17
-    - curl -sSLo /tmp/sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.7.0.2747-linux.zip
-    - unzip /tmp/sonar-scanner.zip -d /opt
-    - export PATH=$PATH:/opt/sonar-scanner-4.7.0.2747-linux/bin
+  image: sonarsource/sonar-scanner-cli:4.7
   script:
     - cd frontend
     - npm install
