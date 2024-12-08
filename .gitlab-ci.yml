@@ -106,12 +106,12 @@ trivy scan image frontend:
     variables:
         GIT_STRATEGY: none
     script:
-       - trivy image --format html -o frontend.html $HARBOR_URL/$HARBOR_DEV_REG/frontend:$IMAGE_VERSION
+       - trivy image --format json -o frontend.json $HARBOR_URL/$HARBOR_DEV_REG/frontend:$IMAGE_VERSION
     tags:
         - runner2-dev-shell
     artifacts:
       paths:
-        - frontend.html
+        - frontend.json
       expire_in: 1 day
     <<: *default_rules
 
