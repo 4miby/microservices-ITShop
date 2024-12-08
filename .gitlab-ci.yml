@@ -108,6 +108,7 @@ trivy scan image frontend:
     script:
       - trivy image --reset
       - trivy image --severity UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL $HARBOR_URL/$HARBOR_DEV_REG/frontend:$IMAGE_VERSION
+      
     tags:
         - runner2-dev-shell
     artifacts:
