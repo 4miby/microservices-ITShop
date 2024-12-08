@@ -23,27 +23,17 @@ variables:
     - if: $CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"
 
 
-# sonarqube-check backend:
-#   stage: sonarqube-check
-#   image: maven:3-eclipse-temurin-21
-#   script:
-#     - mvn clean package -DskipTests
-#     - for service in api-gateway identity-service inventory-service notification-service order-service product-service; do
-#         echo "Scanning $service";
-#         cd $service;
-#         mvn sonar:sonar -Dsonar.projectKey="$CI_PROJECT_NAME-$service" -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_TOKEN;
-#         cd ..;
-#       done
-#   allow_failure: true
-#   <<: *default_rules
-#   tags:
-#     - runner2-dev-shell
-
-sonarqube-check frontend:
+sonarqube-check:
   stage: sonarqube-check
-  image: sonarsource/sonar-scanner-cli:4.7
+  image: maven:3-eclipse-temurin-21
   script:
-    - sonar-scanner -Dsonar.projectKey="frontend" -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_TOKEN -Dsonar.sources=frontend/src
+    - mvn clean package -DskipTests
+    - for service in api-gateway identity-service inventory-service notification-service order-service product-service; do
+        echo "Scanning $service";
+        cd $service;
+        mvn sonar:sonar -Dsonar.projectKey="$CI_PROJECT_NAME-$service" -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_TOKEN;
+        cd ..;
+      done
   allow_failure: true
   <<: *default_rules
   tags:
