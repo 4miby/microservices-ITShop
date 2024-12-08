@@ -43,10 +43,11 @@ dependency-check:
   stage: dependency-check
   script:
     - mvn org.owasp:dependency-check-maven:check
+    - ls -al target 
   allow_failure: true
   <<: *default_rules
   tags:
-    - runner2-dev-shell 
+    - runner2-dev-shell
   artifacts:
     expire_in: 1 day
     reports:
@@ -162,8 +163,6 @@ dependency-check:
 #     - docker login -u $HARBOR_USER -p $HARBOR_PASSWORD $HARBOR_URL
 #     - docker push $HARBOR_URL/$HARBOR_DEV_REG/${SERVICE_NAME}:$IMAGE_VERSION 
 #   <<: *default_rules
-
-
 
 # push frontend prod image:
 #   stage: push prod image
