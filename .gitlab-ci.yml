@@ -146,7 +146,6 @@ push dev frontend image:
     - docker push $HARBOR_URL/$HARBOR_DEV_REG/frontend:$IMAGE_VERSION 
   <<: *default_rules
 
-
 # push dev backend image:
 #   stage: push dev image
 #   tags:
