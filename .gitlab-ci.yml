@@ -42,15 +42,19 @@ variables:
 sonarqube-check frontend:
   stage: sonarqube-check
   image: node:18-alpine
+  before_script:
+    - apk add --no-cache curl openjdk17
+    - curl -sSLo /tmp/sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.7.0.2747-linux.zip
+    - unzip /tmp/sonar-scanner.zip -d /opt
+    - export PATH=$PATH:/opt/sonar-scanner-4.7.0.2747-linux/bin
   script:
-    - cd frontend 
+    - cd frontend
     - npm install
-    - sonar-scanner -Dsonar.projectKey="frontend" -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_TOKEN
-    - cd ..
+    - sonar-scanner -Dsonar.projectKey="frontend" -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_TOKEN -Dsonar.sources=src
   allow_failure: true
   <<: *default_rules
   tags:
-    - runner2-dev-shell  
+    - runner2-dev-shell
 
 # dependency-check:
 #   stage: dependency-check
