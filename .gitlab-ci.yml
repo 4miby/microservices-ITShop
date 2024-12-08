@@ -23,7 +23,7 @@ variables:
     - if: $CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"
 
 
-# sonarqube-check:
+# sonarqube-check backend:
 #   stage: sonarqube-check
 #   image: maven:3-eclipse-temurin-21
 #   script:
@@ -38,6 +38,18 @@ variables:
 #   <<: *default_rules
 #   tags:
 #     - runner2-dev-shell
+
+sonarqube-check frontend:
+  stage: sonarqube-check
+  image: node:18-alpine
+  script:
+    - cd fronted 
+    - sonar-scanner -Dsonar.projectKey="frontend" -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_TOKEN
+    - cd ..
+  allow_failure: true
+  <<: *default_rules
+  tags:
+    - runner2-dev-shell  
 
 # dependency-check:
 #   stage: dependency-check
@@ -65,22 +77,22 @@ variables:
 #     - runner2-dev-shell    
 #   <<: *default_rules
 
-build_frontend:
-  stage: build
-  tags:
-    - runner2-dev-shell
-  image: docker:latest
-  services:
-    - docker:dind
-  script:
-    - cd frontend
-    - docker build --build-arg API_URL=$API_URL -t $HARBOR_URL/$HARBOR_DEV_REG/frontend:$IMAGE_VERSION .
-    - echo $IMAGE_VERSION > ~/version.txt  # Thêm dòng này
-  artifacts:  # Thêm phần artifacts
-    paths:
-      - ~/version.txt
-    expire_in: 1 week
-  <<: *default_rules
+# build_frontend:
+#   stage: build
+#   tags:
+#     - runner2-dev-shell
+#   image: docker:latest
+#   services:
+#     - docker:dind
+#   script:
+#     - cd frontend
+#     - docker build --build-arg API_URL=$API_URL -t $HARBOR_URL/$HARBOR_DEV_REG/frontend:$IMAGE_VERSION .
+#     - echo $IMAGE_VERSION > ~/version.txt  # Thêm dòng này
+#   artifacts:  # Thêm phần artifacts
+#     paths:
+#       - ~/version.txt
+#     expire_in: 1 week
+#   <<: *default_rules
 
 # build_backend:
 #   stage: build
@@ -137,14 +149,14 @@ build_frontend:
 #       expire_in: 1 day    
 #     <<: *default_rules
 
-push dev frontend image:
-  stage: push dev image
-  tags:
-    - runner2-dev-shell 
-  script:
-    - docker login -u $HARBOR_USER -p $HARBOR_PASSWORD $HARBOR_URL
-    - docker push $HARBOR_URL/$HARBOR_DEV_REG/frontend:$IMAGE_VERSION 
-  <<: *default_rules
+# push dev frontend image:
+#   stage: push dev image
+#   tags:
+#     - runner2-dev-shell 
+#   script:
+#     - docker login -u $HARBOR_USER -p $HARBOR_PASSWORD $HARBOR_URL
+#     - docker push $HARBOR_URL/$HARBOR_DEV_REG/frontend:$IMAGE_VERSION 
+#   <<: *default_rules
 
 # push dev backend image:
 #   stage: push dev image
@@ -165,17 +177,17 @@ push dev frontend image:
 
 
 
-push frontend prod image:
-  stage: push prod image
-  tags:
-    - runner2-dev-shell 
-  script:
-    - export DEV_VERSION=$(cat ~/version.txt)
-    - docker login -u $HARBOR_USER -p $HARBOR_PASSWORD $HARBOR_URL
-    - docker pull harbor.dinhcam.tech/$HARBOR_DEV_REG/frontend:$DEV_VERSION
-    - docker tag harbor.dinhcam.tech/$HARBOR_DEV_REG/frontend:$DEV_VERSION harbor.dinhcam.tech/$HARBOR_PROD_REG/frontend:latest
-    - docker push harbor.dinhcam.tech/$HARBOR_PROD_REG/frontend:latest
-  <<: *prod_rules
+# push frontend prod image:
+#   stage: push prod image
+#   tags:
+#     - runner2-dev-shell 
+#   script:
+#     - export DEV_VERSION=$(cat ~/version.txt)
+#     - docker login -u $HARBOR_USER -p $HARBOR_PASSWORD $HARBOR_URL
+#     - docker pull harbor.dinhcam.tech/$HARBOR_DEV_REG/frontend:$DEV_VERSION
+#     - docker tag harbor.dinhcam.tech/$HARBOR_DEV_REG/frontend:$DEV_VERSION harbor.dinhcam.tech/$HARBOR_PROD_REG/frontend:latest
+#     - docker push harbor.dinhcam.tech/$HARBOR_PROD_REG/frontend:latest
+#   <<: *prod_rules
 
 # push backend prod image:
 #   stage: push prod image
