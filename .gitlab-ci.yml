@@ -107,13 +107,12 @@ trivy scan image frontend:
         GIT_STRATEGY: none
     script:
       - trivy image --reset
-      - trivy image --severity UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL $HARBOR_URL/$HARBOR_DEV_REG/frontend:$IMAGE_VERSION
-      
+      - trivy image --format template --template '~/html.tpl' -o frontend.html $HARBOR_URL/$HARBOR_DEV_REG/frontend:$IMAGE_VERSION 
     tags:
         - runner2-dev-shell
     artifacts:
       paths:
-        - frontend.json
+        - frontend.html
       expire_in: 1 day
     <<: *default_rules
 
