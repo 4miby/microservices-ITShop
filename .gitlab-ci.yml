@@ -14,7 +14,7 @@ variables:
   API_URL: http://api.itshop.k8s
   SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  
   GIT_DEPTH: "0"
-  
+
   
 .default_rules: &default_rules
   rules:
@@ -177,11 +177,11 @@ push frontend prod image:
   tags:
     - runner2-dev-shell 
   script:
-    - export PROD_VERSION=$(cat version.txt)
+    - export DEV_VERSION=$(cat version.txt)
     - docker login -u $HARBOR_USER -p $HARBOR_PASSWORD $HARBOR_URL
-    - docker pull $HARBOR_URL/$HARBOR_DEV_REG/frontend:$IMAGE_VERSION
-    - docker tag $HARBOR_URL/$HARBOR_DEV_REG/frontend:$IMAGE_VERSION $HARBOR_URL/$HARBOR_PROD_REG/frontend:$IMAGE_VERSION
-    - docker push $HARBOR_URL/$HARBOR_PROD_REG/frontend:$IMAGE_VERSION
+    - docker pull $HARBOR_URL/$HARBOR_DEV_REG/frontend:$DEV_VERSION
+    - docker tag $HARBOR_URL/$HARBOR_DEV_REG/frontend:$DEV_VERSION $HARBOR_URL/$HARBOR_PROD_REG/frontend:latest
+    - docker push $HARBOR_URL/$HARBOR_PROD_REG/frontend:latest
   <<: *prod_rules
 
 push backend prod image:
@@ -197,9 +197,9 @@ push backend prod image:
         - SERVICE_NAME: inventory-service
         - SERVICE_NAME: notification-service
   script:
-    - export PROD_VERSION=$(cat version.txt)
+    - export DEV_VERSION=$(cat version.txt)
     - docker login -u $HARBOR_USER -p $HARBOR_PASSWORD $HARBOR_URL
-    - docker pull $HARBOR_URL/$HARBOR_DEV_REG/${SERVICE_NAME}:$IMAGE_VERSION
-    - docker tag $HARBOR_URL/$HARBOR_DEV_REG/${SERVICE_NAME}:$IMAGE_VERSION $HARBOR_URL/$HARBOR_PROD_REG/${SERVICE_NAME}:$PROD_VERSION
-    - docker push $HARBOR_URL/$HARBOR_PROD_REG/${SERVICE_NAME}:$PROD_VERSION
+    - docker pull $HARBOR_URL/$HARBOR_DEV_REG/${SERVICE_NAME}:$DEV_VERSION
+    - docker tag $HARBOR_URL/$HARBOR_DEV_REG/${SERVICE_NAME}:$DEV_VERSION $HARBOR_URL/$HARBOR_PROD_REG/${SERVICE_NAME}:latest
+    - docker push $HARBOR_URL/$HARBOR_PROD_REG/${SERVICE_NAME}:latest
   <<: *prod_rules
