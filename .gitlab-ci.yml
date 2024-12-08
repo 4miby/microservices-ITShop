@@ -43,7 +43,7 @@ sonarqube-check frontend:
   stage: sonarqube-check
   image: node:18-alpine
   script:
-    - cd fronted 
+    - cd frontend 
     - sonar-scanner -Dsonar.projectKey="frontend" -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_TOKEN
     - cd ..
   allow_failure: true
