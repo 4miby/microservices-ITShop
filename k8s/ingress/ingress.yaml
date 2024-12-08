@@ -8,7 +8,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: itshop.k8s
+  - host: itshop.gke-dev.dinhcam.tech
     http:
       paths:
       - path: /
@@ -30,7 +30,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: api.itshop.k8s
+  - host: api.gke-dev.dinhcam.tech
     http:
       paths:
       - path: /
