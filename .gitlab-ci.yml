@@ -43,8 +43,7 @@ sonarqube-check frontend:
   stage: sonarqube-check
   image: sonarsource/sonar-scanner-cli:4.7
   script:
-    - cd frontend
-    - sonar-scanner -Dsonar.projectKey="frontend" -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_TOKEN -Dsonar.sources=src
+    - sonar-scanner -Dsonar.projectKey="frontend" -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_TOKEN -Dsonar.sources=frontend/src
   allow_failure: true
   <<: *default_rules
   tags:
