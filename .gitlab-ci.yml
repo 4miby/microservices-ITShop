@@ -51,7 +51,7 @@ dependency-check:
   artifacts:
     expire_in: 1 day
     reports:
-      sast: target/dependency-check-report.json
+      sast: target/dependency-check-report.html
 
 # scan dockerfile:
 #   stage: scan dockerfile
