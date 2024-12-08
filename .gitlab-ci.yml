@@ -172,9 +172,9 @@ push frontend prod image:
   script:
     - export DEV_VERSION=$(cat version.txt)
     - docker login -u $HARBOR_USER -p $HARBOR_PASSWORD $HARBOR_URL
-    - docker pull $HARBOR_URL/$HARBOR_DEV_REG/frontend:$DEV_VERSION
-    - docker tag $HARBOR_URL/$HARBOR_DEV_REG/frontend:$DEV_VERSION $HARBOR_URL/$HARBOR_PROD_REG/frontend:latest
-    - docker push $HARBOR_URL/$HARBOR_PROD_REG/frontend:latest
+    - docker pull harbor.dinhcam.tech/$HARBOR_DEV_REG/frontend:$DEV_VERSION
+    - docker tag harbor.dinhcam.tech/$HARBOR_DEV_REG/frontend:$DEV_VERSION harbor.dinhcam.tech/$HARBOR_PROD_REG/frontend:latest
+    - docker push harbor.dinhcam.tech/$HARBOR_PROD_REG/frontend:latest
   <<: *prod_rules
 
 push backend prod image:
@@ -192,7 +192,7 @@ push backend prod image:
   script:
     - export DEV_VERSION=$(cat version.txt)
     - docker login -u $HARBOR_USER -p $HARBOR_PASSWORD $HARBOR_URL
-    - docker pull $HARBOR_URL/$HARBOR_DEV_REG/${SERVICE_NAME}:$DEV_VERSION
-    - docker tag $HARBOR_URL/$HARBOR_DEV_REG/${SERVICE_NAME}:$DEV_VERSION $HARBOR_URL/$HARBOR_PROD_REG/${SERVICE_NAME}:latest
-    - docker push $HARBOR_URL/$HARBOR_PROD_REG/${SERVICE_NAME}:latest
+    - docker pull harbor.dinhcam.tech/$HARBOR_DEV_REG/${SERVICE_NAME}:$DEV_VERSION
+    - docker tag harbor.dinhcam.tech/$HARBOR_DEV_REG/${SERVICE_NAME}:$DEV_VERSION harbor.dinhcam.tech/$HARBOR_PROD_REG/${SERVICE_NAME}:latest
+    - docker push harbor.dinhcam.tech/$HARBOR_PROD_REG/${SERVICE_NAME}:latest
   <<: *prod_rules
