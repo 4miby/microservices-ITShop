@@ -106,7 +106,8 @@ trivy scan image frontend:
     variables:
         GIT_STRATEGY: none
     script:
-       - trivy image --format json -o frontend.json $HARBOR_URL/$HARBOR_DEV_REG/frontend:$IMAGE_VERSION
+      - trivy image --reset
+      - trivy image --severity UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL $HARBOR_URL/$HARBOR_DEV_REG/frontend:$IMAGE_VERSION
     tags:
         - runner2-dev-shell
     artifacts:
