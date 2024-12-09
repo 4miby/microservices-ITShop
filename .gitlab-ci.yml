@@ -39,18 +39,30 @@ variables:
 #   tags:
 #     - runner2-dev-shell
 
+stages:
+  - dependency-check
+
 dependency-check:
   stage: dependency-check
+  parallel:
+    matrix:
+      - SERVICE: api-gateway
+      - SERVICE: identity-service
+      - SERVICE: inventory-service
+      - SERVICE: notification-service
+      - SERVICE: order-service
+      - SERVICE: product-service
   script:
-    - mvn org.owasp:dependency-check-maven:check
+    - cd $SERVICE
+    - mvn org.owasp:dependency-check-maven:check -DoutputDirectory=../dependency-check-reports/$SERVICE
   allow_failure: true
-  <<: *default_rules
-  tags:
-    - runner2-dev-shell
   artifacts:
+    paths:
+      - dependency-check-reports/
     expire_in: 1 day
     reports:
-      sast: target/dependency-check-report.json
+      sast: dependency-check-reports/$SERVICE/dependency-check-report.json
+
 
 # scan dockerfile:
 #   stage: scan dockerfile
