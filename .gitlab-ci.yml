@@ -1,4 +1,5 @@
 stages:
+  - test
   - sonarqube-check
   - sonarqube-vulnerability-report
   - dependency-check   
@@ -23,6 +24,13 @@ variables:
     - if: $CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"
 
 
+
+stage: test
+  script:
+    - echo "Pipeline ID hiện tại là: $CI_PIPELINE_ID"
+  tags:
+    - runner2-dev-shell
+
 # sonarqube-check:
 #   stage: sonarqube-check
 #   image: maven:3-eclipse-temurin-21
@@ -39,27 +47,27 @@ variables:
 #   tags:
 #     - runner2-dev-shell
 
-dependency-check:
-  stage: dependency-check
-  parallel:
-    matrix:
-      - SERVICE: api-gateway
-      - SERVICE: identity-service
-      - SERVICE: inventory-service
-      - SERVICE: notification-service
-      - SERVICE: order-service
-      - SERVICE: product-service
-  script:
-    - cd $SERVICE
-    - mvn org.owasp:dependency-check-maven:check
-  allow_failure: true
-  <<: *default_rules
-  tags:
-    - runner2-dev-shell
-  artifacts:
-    expire_in: 1 day
-    reports:
-      sast: $SERVICE/target/dependency-check-report.json
+# dependency-check:
+#   stage: dependency-check
+#   parallel:
+#     matrix:
+#       - SERVICE: api-gateway
+#       - SERVICE: identity-service
+#       - SERVICE: inventory-service
+#       - SERVICE: notification-service
+#       - SERVICE: order-service
+#       - SERVICE: product-service
+#   script:
+#     - cd $SERVICE
+#     - mvn org.owasp:dependency-check-maven:check
+#   allow_failure: true
+#   <<: *default_rules
+#   tags:
+#     - runner2-dev-shell
+#   artifacts:
+#     expire_in: 1 day
+#     reports:
+#       sast: $SERVICE/target/dependency-check-report.json
 
 
 # scan dockerfile:
