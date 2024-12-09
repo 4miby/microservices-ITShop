@@ -53,6 +53,8 @@ dependency-check:
     - cd $SERVICE
     - mvn org.owasp:dependency-check-maven:check -DoutputDirectory=../dependency-check-reports/$SERVICE
   allow_failure: true
+  tags:
+    - runner2-dev-shell
   artifacts:
     paths:
       - dependency-check-reports/
