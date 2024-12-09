@@ -39,9 +39,6 @@ variables:
 #   tags:
 #     - runner2-dev-shell
 
-stages:
-  - dependency-check
-
 dependency-check:
   stage: dependency-check
   parallel:
