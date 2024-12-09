@@ -39,6 +39,21 @@ variables:
 #   tags:
 #     - runner2-dev-shell
 
+# dependency-check:
+#   stage: dependency-check
+#   script:
+#     - mvn org.owasp:dependency-check-maven:check
+#   allow_failure: true
+#   <<: *default_rules
+#   tags:
+#     - runner2-dev-shell
+#   artifacts:
+#     expire_in: 1 day
+#     reports:
+#       sast: target/dependency-check-report.json
+
+
+
 dependency-check:
   stage: dependency-check
   parallel:
@@ -50,8 +65,10 @@ dependency-check:
       - SERVICE: order-service
       - SERVICE: product-service
   script:
+    - mkdir -p dependency-check-reports/$SERVICE
     - cd $SERVICE
     - mvn org.owasp:dependency-check-maven:check -DoutputDirectory=../dependency-check-reports/$SERVICE
+    - ls -R ../dependency-check-reports/
   allow_failure: true
   tags:
     - runner2-dev-shell
