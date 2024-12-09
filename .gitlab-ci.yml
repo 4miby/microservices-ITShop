@@ -85,68 +85,68 @@ build_frontend:
   script:
     - cd frontend
     - docker build --build-arg API_URL=$API_URL -t $HARBOR_URL/$HARBOR_DEV_REG/frontend:$IMAGE_VERSION .
-    - echo $IMAGE_VERSION > ~/version.txt  # Thêm dòng này
-  artifacts:  # Thêm phần artifacts
-    paths:
-      - ~/version.txt
-    expire_in: 1 week
+    - echo $IMAGE_VERSION > ~/version.txt  
+  # artifacts: 
+  #   paths:
+  #     - ~/version.txt
+  #   expire_in: 1 week
   <<: *default_rules
 
-# build_backend:
-#   stage: build
-#   tags: 
-#     - runner2-dev-shell 
-#   parallel:
-#     matrix:
-#       - SERVICE_NAME: api-gateway
-#       - SERVICE_NAME: order-service
-#       - SERVICE_NAME: product-service
-#       - SERVICE_NAME: identity-service
-#       - SERVICE_NAME: inventory-service
-#       - SERVICE_NAME: notification-service
-#   image: docker:latest
-#   services:
-#     - docker:dind
-#   script:
-#     - docker build -t $HARBOR_URL/$HARBOR_DEV_REG/${SERVICE_NAME}:$IMAGE_VERSION -f ${SERVICE_NAME}/Dockerfile .
-#   <<: *default_rules
+build_backend:
+  stage: build
+  tags: 
+    - runner2-dev-shell 
+  parallel:
+    matrix:
+      - SERVICE_NAME: api-gateway
+      - SERVICE_NAME: order-service
+      - SERVICE_NAME: product-service
+      - SERVICE_NAME: identity-service
+      - SERVICE_NAME: inventory-service
+      - SERVICE_NAME: notification-service
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - docker build -t $HARBOR_URL/$HARBOR_DEV_REG/${SERVICE_NAME}:$IMAGE_VERSION -f ${SERVICE_NAME}/Dockerfile .
+  <<: *default_rules
 
-# trivy scan image frontend:
-#     stage: scan docker image
-#     variables:
-#         GIT_STRATEGY: none
-#     script:
-#       - trivy image --reset
-#       - trivy image --format template --template '@contrib/html.tpl' -o frontend.html $HARBOR_URL/$HARBOR_DEV_REG/frontend:$IMAGE_VERSION 
-#     tags:
-#         - runner2-dev-shell
-#     artifacts:
-#       paths:
-#         - frontend.html
-#       expire_in: 1 day
-#     <<: *default_rules
+trivy scan image frontend:
+    stage: scan docker image
+    variables:
+        GIT_STRATEGY: none
+    script:
+      - trivy image --reset
+      - trivy image --format template --template '@contrib/html.tpl' -o frontend.html $HARBOR_URL/$HARBOR_DEV_REG/frontend:$IMAGE_VERSION 
+    tags:
+        - runner2-dev-shell
+    artifacts:
+      paths:
+        - frontend.html
+      expire_in: 1 day
+    <<: *default_rules
 
-# trivy scan image backend:
-#     stage: scan docker image
-#     variables:
-#         GIT_STRATEGY: none
-#     parallel:
-#       matrix:
-#         - SERVICE_NAME: api-gateway
-#         - SERVICE_NAME: order-service
-#         - SERVICE_NAME: product-service
-#         - SERVICE_NAME: identity-service
-#         - SERVICE_NAME: inventory-service
-#         - SERVICE_NAME: notification-service      
-#     script:
-#         - trivy image --format template --template '~/html.tpl' -o ${SERVICE_NAME}.html $HARBOR_URL/$HARBOR_DEV_REG/${SERVICE_NAME}:$IMAGE_VERSION 
-#     tags:
-#         - runner2-dev-shell  
-#     artifacts:
-#       paths:
-#         - ${SERVICE_NAME}.html
-#       expire_in: 1 day    
-#     <<: *default_rules
+trivy scan image backend:
+    stage: scan docker image
+    variables:
+        GIT_STRATEGY: none
+    parallel:
+      matrix:
+        - SERVICE_NAME: api-gateway
+        - SERVICE_NAME: order-service
+        - SERVICE_NAME: product-service
+        - SERVICE_NAME: identity-service
+        - SERVICE_NAME: inventory-service
+        - SERVICE_NAME: notification-service      
+    script:
+        - trivy image --format template --template '~/html.tpl' -o ${SERVICE_NAME}.html $HARBOR_URL/$HARBOR_DEV_REG/${SERVICE_NAME}:$IMAGE_VERSION 
+    tags:
+        - runner2-dev-shell  
+    artifacts:
+      paths:
+        - ${SERVICE_NAME}.html
+      expire_in: 1 day    
+    <<: *default_rules
 
 push dev frontend image:
   stage: push dev image
@@ -157,22 +157,22 @@ push dev frontend image:
     - docker push $HARBOR_URL/$HARBOR_DEV_REG/frontend:$IMAGE_VERSION 
   <<: *default_rules
 
-# push dev backend image:
-#   stage: push dev image
-#   tags:
-#     - runner2-dev-shell 
-#   parallel:
-#       matrix:
-#         - SERVICE_NAME: api-gateway
-#         - SERVICE_NAME: order-service
-#         - SERVICE_NAME: product-service
-#         - SERVICE_NAME: identity-service
-#         - SERVICE_NAME: inventory-service
-#         - SERVICE_NAME: notification-service
-#   script:
-#     - docker login -u $HARBOR_USER -p $HARBOR_PASSWORD $HARBOR_URL
-#     - docker push $HARBOR_URL/$HARBOR_DEV_REG/${SERVICE_NAME}:$IMAGE_VERSION 
-#   <<: *default_rules
+push dev backend image:
+  stage: push dev image
+  tags:
+    - runner2-dev-shell 
+  parallel:
+      matrix:
+        - SERVICE_NAME: api-gateway
+        - SERVICE_NAME: order-service
+        - SERVICE_NAME: product-service
+        - SERVICE_NAME: identity-service
+        - SERVICE_NAME: inventory-service
+        - SERVICE_NAME: notification-service
+  script:
+    - docker login -u $HARBOR_USER -p $HARBOR_PASSWORD $HARBOR_URL
+    - docker push $HARBOR_URL/$HARBOR_DEV_REG/${SERVICE_NAME}:$IMAGE_VERSION 
+  <<: *default_rules
 
 push frontend prod image:
   stage: push prod image
@@ -186,22 +186,22 @@ push frontend prod image:
     - docker push $HARBOR_URL/$HARBOR_PROD_REG/frontend:$NUMBER_OF_PIPELINE
   <<: *prod_rules
 
-# push backend prod image:
-#   stage: push prod image
-#   tags:
-#     - runner2-dev-shell 
-#   parallel:
-#       matrix:
-#         - SERVICE_NAME: api-gateway
-#         - SERVICE_NAME: order-service
-#         - SERVICE_NAME: product-service
-#         - SERVICE_NAME: identity-service
-#         - SERVICE_NAME: inventory-service
-#         - SERVICE_NAME: notification-service
-#   script:
-#     - export DEV_VERSION=$(cat ~/version.txt)
-#     - docker login -u $HARBOR_USER -p $HARBOR_PASSWORD $HARBOR_URL
-#     - docker pull $HARBOR_URL/$HARBOR_DEV_REG/${SERVICE_NAME}:$DEV_VERSION
-#     - docker tag  $HARBOR_URL/$HARBOR_DEV_REG/${SERVICE_NAME}:$DEV_VERSION $HARBOR_URL/$HARBOR_PROD_REG/${SERVICE_NAME}:latest
-#     - docker push $HARBOR_URL/$HARBOR_PROD_REG/${SERVICE_NAME}:latest
-#   <<: *prod_rules
+push backend prod image:
+  stage: push prod image
+  tags:
+    - runner2-dev-shell 
+  parallel:
+      matrix:
+        - SERVICE_NAME: api-gateway
+        - SERVICE_NAME: order-service
+        - SERVICE_NAME: product-service
+        - SERVICE_NAME: identity-service
+        - SERVICE_NAME: inventory-service
+        - SERVICE_NAME: notification-service
+  script:
+    - export DEV_VERSION=$(cat ~/version.txt)
+    - docker login -u $HARBOR_USER -p $HARBOR_PASSWORD $HARBOR_URL
+    - docker pull $HARBOR_URL/$HARBOR_DEV_REG/${SERVICE_NAME}:$DEV_VERSION
+    - docker tag  $HARBOR_URL/$HARBOR_DEV_REG/${SERVICE_NAME}:$DEV_VERSION $HARBOR_URL/$HARBOR_PROD_REG/${SERVICE_NAME}:$NUMBER_OF_PIPELINE
+    - docker push $HARBOR_URL/$HARBOR_PROD_REG/${SERVICE_NAME}:$NUMBER_OF_PIPELINE
+  <<: *prod_rules
