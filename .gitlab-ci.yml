@@ -1,5 +1,4 @@
 stages:
-  - test
   - sonarqube-check
   - sonarqube-vulnerability-report
   - dependency-check   
@@ -23,15 +22,6 @@ variables:
 .prod_rules: &prod_rules
   rules:
     - if: $CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"
-
-
-
-test:
-  stage: test
-  script:
-    - echo "Pipeline ID hiện tại là " $NUMBER_OF_PIPELINE
-  tags:
-    - runner2-dev-shell
 
 # sonarqube-check:
 #   stage: sonarqube-check
@@ -85,22 +75,22 @@ test:
 #     - runner2-dev-shell    
 #   <<: *default_rules
 
-# build_frontend:
-#   stage: build
-#   tags:
-#     - runner2-dev-shell
-#   image: docker:latest
-#   services:
-#     - docker:dind
-#   script:
-#     - cd frontend
-#     - docker build --build-arg API_URL=$API_URL -t $HARBOR_URL/$HARBOR_DEV_REG/frontend:$IMAGE_VERSION .
-#     - echo $IMAGE_VERSION > ~/version.txt  # Thêm dòng này
-#   artifacts:  # Thêm phần artifacts
-#     paths:
-#       - ~/version.txt
-#     expire_in: 1 week
-#   <<: *default_rules
+build_frontend:
+  stage: build
+  tags:
+    - runner2-dev-shell
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - cd frontend
+    - docker build --build-arg API_URL=$API_URL -t $HARBOR_URL/$HARBOR_DEV_REG/frontend:$IMAGE_VERSION .
+    - echo $IMAGE_VERSION > ~/version.txt  # Thêm dòng này
+  artifacts:  # Thêm phần artifacts
+    paths:
+      - ~/version.txt
+    expire_in: 1 week
+  <<: *default_rules
 
 # build_backend:
 #   stage: build
@@ -158,14 +148,14 @@ test:
 #       expire_in: 1 day    
 #     <<: *default_rules
 
-# push dev frontend image:
-#   stage: push dev image
-#   tags:
-#     - runner2-dev-shell 
-#   script:
-#     - docker login -u $HARBOR_USER -p $HARBOR_PASSWORD $HARBOR_URL
-#     - docker push $HARBOR_URL/$HARBOR_DEV_REG/frontend:$IMAGE_VERSION 
-#   <<: *default_rules
+push dev frontend image:
+  stage: push dev image
+  tags:
+    - runner2-dev-shell 
+  script:
+    - docker login -u $HARBOR_USER -p $HARBOR_PASSWORD $HARBOR_URL
+    - docker push $HARBOR_URL/$HARBOR_DEV_REG/frontend:$IMAGE_VERSION 
+  <<: *default_rules
 
 # push dev backend image:
 #   stage: push dev image
@@ -184,17 +174,17 @@ test:
 #     - docker push $HARBOR_URL/$HARBOR_DEV_REG/${SERVICE_NAME}:$IMAGE_VERSION 
 #   <<: *default_rules
 
-# push frontend prod image:
-#   stage: push prod image
-#   tags:
-#     - runner2-dev-shell 
-#   script:
-#     - export DEV_VERSION=$(cat ~/version.txt)
-#     - docker login -u $HARBOR_USER -p $HARBOR_PASSWORD $HARBOR_URL
-#     - docker pull $HARBOR_URL/$HARBOR_DEV_REG/frontend:$DEV_VERSION
-#     - docker tag $HARBOR_URL/$HARBOR_DEV_REG/frontend:$DEV_VERSION $HARBOR_URL/$HARBOR_PROD_REG/frontend:latest
-#     - docker push $HARBOR_URL/$HARBOR_PROD_REG/frontend:latest
-#   <<: *prod_rules
+push frontend prod image:
+  stage: push prod image
+  tags:
+    - runner2-dev-shell 
+  script:
+    - export DEV_VERSION=$(cat ~/version.txt)
+    - docker login -u $HARBOR_USER -p $HARBOR_PASSWORD $HARBOR_URL
+    - docker pull $HARBOR_URL/$HARBOR_DEV_REG/frontend:$DEV_VERSION
+    - docker tag $HARBOR_URL/$HARBOR_DEV_REG/frontend:$DEV_VERSION $HARBOR_URL/$HARBOR_PROD_REG/frontend:$NUMBER_OF_PIPELINE
+    - docker push $HARBOR_URL/$HARBOR_PROD_REG/frontend:$NUMBER_OF_PIPELINE
+  <<: *prod_rules
 
 # push backend prod image:
 #   stage: push prod image
