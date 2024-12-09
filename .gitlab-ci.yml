@@ -14,6 +14,7 @@ variables:
   API_URL: http://api.gke-dev.dinhcam.tech
   SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  
   GIT_DEPTH: "0"
+  NUMBER_OF_PIPELINE: $CI_PIPELINE_ID
 
   
 .default_rules: &default_rules
@@ -27,7 +28,7 @@ variables:
 
 stage: test
   script:
-    - echo "Pipeline ID hiện tại là: $CI_PIPELINE_ID"
+    - echo "Pipeline ID hiện tại là " $NUMBER_OF_PIPELINE
   tags:
     - runner2-dev-shell
 
