@@ -60,7 +60,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <format>HTML</format> 
+                    <format>json</format> 
                 </configuration>
             </plugin>
         </plugins>

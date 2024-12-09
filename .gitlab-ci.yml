@@ -13,6 +13,7 @@ variables:
   API_URL: http://api.gke-dev.dinhcam.tech
   SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  
   GIT_DEPTH: "0"
+  NUMBER_OF_PIPELINE: $CI_PIPELINE_ID
 
   
 .default_rules: &default_rules
@@ -21,7 +22,6 @@ variables:
 .prod_rules: &prod_rules
   rules:
     - if: $CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"
-
 
 # sonarqube-check:
 #   stage: sonarqube-check
@@ -41,7 +41,16 @@ variables:
 
 # dependency-check:
 #   stage: dependency-check
+#   parallel:
+#     matrix:
+#       - SERVICE: api-gateway
+#       - SERVICE: identity-service
+#       - SERVICE: inventory-service
+#       - SERVICE: notification-service
+#       - SERVICE: order-service
+#       - SERVICE: product-service
 #   script:
+#     - cd $SERVICE
 #     - mvn org.owasp:dependency-check-maven:check
 #   allow_failure: true
 #   <<: *default_rules
@@ -50,7 +59,8 @@ variables:
 #   artifacts:
 #     expire_in: 1 day
 #     reports:
-#       sast: target/dependency-check-report.html
+#       sast: $SERVICE/target/dependency-check-report.json
+
 
 # scan dockerfile:
 #   stage: scan dockerfile
@@ -101,20 +111,20 @@ build_frontend:
 #     - docker build -t $HARBOR_URL/$HARBOR_DEV_REG/${SERVICE_NAME}:$IMAGE_VERSION -f ${SERVICE_NAME}/Dockerfile .
 #   <<: *default_rules
 
-trivy scan image frontend:
-    stage: scan docker image
-    variables:
-        GIT_STRATEGY: none
-    script:
-      - trivy image --reset
-      - trivy image --severity UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL $HARBOR_URL/$HARBOR_DEV_REG/frontend:$IMAGE_VERSION
-    tags:
-        - runner2-dev-shell
-    artifacts:
-      paths:
-        - frontend.json
-      expire_in: 1 day
-    <<: *default_rules
+# trivy scan image frontend:
+#     stage: scan docker image
+#     variables:
+#         GIT_STRATEGY: none
+#     script:
+#       - trivy image --reset
+#       - trivy image --format template --template '@contrib/html.tpl' -o frontend.html $HARBOR_URL/$HARBOR_DEV_REG/frontend:$IMAGE_VERSION 
+#     tags:
+#         - runner2-dev-shell
+#     artifacts:
+#       paths:
+#         - frontend.html
+#       expire_in: 1 day
+#     <<: *default_rules
 
 # trivy scan image backend:
 #     stage: scan docker image
@@ -138,14 +148,14 @@ trivy scan image frontend:
 #       expire_in: 1 day    
 #     <<: *default_rules
 
-# push dev frontend image:
-#   stage: push dev image
-#   tags:
-#     - runner2-dev-shell 
-#   script:
-#     - docker login -u $HARBOR_USER -p $HARBOR_PASSWORD $HARBOR_URL
-#     - docker push $HARBOR_URL/$HARBOR_DEV_REG/frontend:$IMAGE_VERSION 
-#   <<: *default_rules
+push dev frontend image:
+  stage: push dev image
+  tags:
+    - runner2-dev-shell 
+  script:
+    - docker login -u $HARBOR_USER -p $HARBOR_PASSWORD $HARBOR_URL
+    - docker push $HARBOR_URL/$HARBOR_DEV_REG/frontend:$IMAGE_VERSION 
+  <<: *default_rules
 
 # push dev backend image:
 #   stage: push dev image
@@ -164,17 +174,17 @@ trivy scan image frontend:
 #     - docker push $HARBOR_URL/$HARBOR_DEV_REG/${SERVICE_NAME}:$IMAGE_VERSION 
 #   <<: *default_rules
 
-# push frontend prod image:
-#   stage: push prod image
-#   tags:
-#     - runner2-dev-shell 
-#   script:
-#     - export DEV_VERSION=$(cat ~/version.txt)
-#     - docker login -u $HARBOR_USER -p $HARBOR_PASSWORD $HARBOR_URL
-#     - docker pull $HARBOR_URL/$HARBOR_DEV_REG/frontend:$DEV_VERSION
-#     - docker tag $HARBOR_URL/$HARBOR_DEV_REG/frontend:$DEV_VERSION $HARBOR_URL/$HARBOR_PROD_REG/frontend:latest
-#     - docker push $HARBOR_URL/$HARBOR_PROD_REG/frontend:latest
-#   <<: *prod_rules
+push frontend prod image:
+  stage: push prod image
+  tags:
+    - runner2-dev-shell 
+  script:
+    - export DEV_VERSION=$(cat ~/version.txt)
+    - docker login -u $HARBOR_USER -p $HARBOR_PASSWORD $HARBOR_URL
+    - docker pull $HARBOR_URL/$HARBOR_DEV_REG/frontend:$DEV_VERSION
+    - docker tag $HARBOR_URL/$HARBOR_DEV_REG/frontend:$DEV_VERSION $HARBOR_URL/$HARBOR_PROD_REG/frontend:$NUMBER_OF_PIPELINE
+    - docker push $HARBOR_URL/$HARBOR_PROD_REG/frontend:$NUMBER_OF_PIPELINE
+  <<: *prod_rules
 
 # push backend prod image:
 #   stage: push prod image
