@@ -26,7 +26,8 @@ variables:
 
 
 
-stage: test
+test:
+  stage: test
   script:
     - echo "Pipeline ID hiện tại là " $NUMBER_OF_PIPELINE
   tags:
