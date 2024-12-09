@@ -42,7 +42,11 @@ variables:
 dependency-check:
   stage: dependency-check
   script:
-    - mvn org.owasp:dependency-check-maven:check
+   - for service in api-gateway identity-service inventory-service notification-service order-service product-service; do
+        echo "Scanning $service";
+        cd $service;
+        mvn org.owasp:dependency-check-maven:check
+        cd ..;
   allow_failure: true
   <<: *default_rules
   tags:
