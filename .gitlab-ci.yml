@@ -9,7 +9,6 @@ stages:
   - build prod image
   - push prod image
   
-
 variables:
   IMAGE_VERSION: $CI_COMMIT_SHORT_SHA
   API_DEV_URL: http://api.gke-dev.dinhcam.tech
@@ -18,7 +17,6 @@ variables:
   GIT_DEPTH: "0"
   NUMBER_OF_PIPELINE: $CI_PIPELINE_ID
 
-  
 .default_rules: &default_rules
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
