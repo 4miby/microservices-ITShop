@@ -183,7 +183,7 @@ update image dev :
     - runner2-dev-shell
   script:
     - ~/update_tag.sh $IMAGE_VERSION
-  <<: *prod_rules 
+  <<: *default_rules 
 
 
 # build prod frontend image:
