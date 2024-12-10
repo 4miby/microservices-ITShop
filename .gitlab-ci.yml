@@ -8,6 +8,7 @@ stages:
   - push dev image
   - build prod image
   - push prod image
+  
 
 variables:
   IMAGE_VERSION: $CI_COMMIT_SHORT_SHA
