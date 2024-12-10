@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.services.identityService.name }}
+spec:
+  selector:
+    app: {{ .Values.services.identityService.name }}
+  ports:
+    - protocol: TCP
+      port: {{ .Values.services.identityService.port }}
+      targetPort: {{ .Values.services.identityService.port }}
