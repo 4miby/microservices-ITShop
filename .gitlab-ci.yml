@@ -3,14 +3,16 @@ stages:
   - sonarqube-vulnerability-report
   - dependency-check   
   - scan dockerfile
-  - build
+  - build dev image
   - scan docker image 
   - push dev image
+  - build prod image
   - push prod image
 
 variables:
   IMAGE_VERSION: $CI_COMMIT_SHORT_SHA
-  API_URL: http://api.gke-dev.dinhcam.tech
+  API_DEV_URL: http://api.gke-dev.dinhcam.tech
+  API_PROD_URL: http://api.gke-prod.dinhcam.tech
   SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  
   GIT_DEPTH: "0"
   NUMBER_OF_PIPELINE: $CI_PIPELINE_ID
@@ -21,7 +23,7 @@ variables:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
 .prod_rules: &prod_rules
   rules:
-    - if: $CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"
+    - if: $CI_COMMIT_TAG && $CI_COMMIT_BRANCH == "main"  
 
 # sonarqube-check:
 #   stage: sonarqube-check
@@ -76,7 +78,7 @@ variables:
 #   <<: *default_rules
 
 build_frontend:
-  stage: build
+  stage: build dev image
   tags:
     - runner2-dev-shell
   image: docker:latest
@@ -84,7 +86,7 @@ build_frontend:
     - docker:dind
   script:
     - cd frontend
-    - docker build --build-arg API_URL=$API_URL -t $HARBOR_URL/$HARBOR_DEV_REG/frontend:$IMAGE_VERSION .
+    - docker build --build-arg API_URL=$API_DEV_URL -t $HARBOR_URL/$HARBOR_DEV_REG/frontend:$IMAGE_VERSION .
     - echo $IMAGE_VERSION > ~/version.txt  
   # artifacts: 
   #   paths:
@@ -92,61 +94,61 @@ build_frontend:
   #   expire_in: 1 week
   <<: *default_rules
 
-build_backend:
-  stage: build
-  tags: 
-    - runner2-dev-shell 
-  parallel:
-    matrix:
-      - SERVICE_NAME: api-gateway
-      - SERVICE_NAME: order-service
-      - SERVICE_NAME: product-service
-      - SERVICE_NAME: identity-service
-      - SERVICE_NAME: inventory-service
-      - SERVICE_NAME: notification-service
-  image: docker:latest
-  services:
-    - docker:dind
-  script:
-    - docker build -t $HARBOR_URL/$HARBOR_DEV_REG/${SERVICE_NAME}:$IMAGE_VERSION -f ${SERVICE_NAME}/Dockerfile .
-  <<: *default_rules
+# build_backend:
+#   stage: build dev image
+#   tags: 
+#     - runner2-dev-shell 
+#   parallel:
+#     matrix:
+#       - SERVICE_NAME: api-gateway
+#       - SERVICE_NAME: order-service
+#       - SERVICE_NAME: product-service
+#       - SERVICE_NAME: identity-service
+#       - SERVICE_NAME: inventory-service
+#       - SERVICE_NAME: notification-service
+#   image: docker:latest
+#   services:
+#     - docker:dind
+#   script:
+#     - docker build -t $HARBOR_URL/$HARBOR_DEV_REG/${SERVICE_NAME}:$IMAGE_VERSION -f ${SERVICE_NAME}/Dockerfile .
+#   <<: *default_rules
 
-trivy scan image frontend:
-    stage: scan docker image
-    variables:
-        GIT_STRATEGY: none
-    script:
-      - trivy image --reset
-      - trivy image --format template --template '~/html.tpl' -o frontend.html $HARBOR_URL/$HARBOR_DEV_REG/frontend:$IMAGE_VERSION 
-    tags:
-        - runner2-dev-shell
-    artifacts:
-      paths:
-        - frontend.html
-      expire_in: 1 day
-    <<: *default_rules
+# trivy scan image frontend:
+#     stage: scan docker image
+#     variables:
+#         GIT_STRATEGY: none
+#     script:
+#       - trivy image --reset
+#       - trivy image --format template --template '~/html.tpl' -o frontend.html $HARBOR_URL/$HARBOR_DEV_REG/frontend:$IMAGE_VERSION 
+#     tags:
+#         - runner2-dev-shell
+#     artifacts:
+#       paths:
+#         - frontend.html
+#       expire_in: 1 day
+#     <<: *default_rules
 
-trivy scan image backend:
-    stage: scan docker image
-    variables:
-        GIT_STRATEGY: none
-    parallel:
-      matrix:
-        - SERVICE_NAME: api-gateway
-        - SERVICE_NAME: order-service
-        - SERVICE_NAME: product-service
-        - SERVICE_NAME: identity-service
-        - SERVICE_NAME: inventory-service
-        - SERVICE_NAME: notification-service      
-    script:
-        - trivy image --format template --template '~/html.tpl' -o ${SERVICE_NAME}.html $HARBOR_URL/$HARBOR_DEV_REG/${SERVICE_NAME}:$IMAGE_VERSION 
-    tags:
-        - runner2-dev-shell  
-    artifacts:
-      paths:
-        - ${SERVICE_NAME}.html
-      expire_in: 1 day    
-    <<: *default_rules
+# trivy scan image backend:
+#     stage: scan docker image
+#     variables:
+#         GIT_STRATEGY: none
+#     parallel:
+#       matrix:
+#         - SERVICE_NAME: api-gateway
+#         - SERVICE_NAME: order-service
+#         - SERVICE_NAME: product-service
+#         - SERVICE_NAME: identity-service
+#         - SERVICE_NAME: inventory-service
+#         - SERVICE_NAME: notification-service      
+#     script:
+#         - trivy image --format template --template '~/html.tpl' -o ${SERVICE_NAME}.html $HARBOR_URL/$HARBOR_DEV_REG/${SERVICE_NAME}:$IMAGE_VERSION 
+#     tags:
+#         - runner2-dev-shell  
+#     artifacts:
+#       paths:
+#         - ${SERVICE_NAME}.html
+#       expire_in: 1 day    
+#     <<: *default_rules
 
 push dev frontend image:
   stage: push dev image
@@ -157,51 +159,58 @@ push dev frontend image:
     - docker push $HARBOR_URL/$HARBOR_DEV_REG/frontend:$IMAGE_VERSION 
   <<: *default_rules
 
-push dev backend image:
-  stage: push dev image
-  tags:
-    - runner2-dev-shell 
-  parallel:
-      matrix:
-        - SERVICE_NAME: api-gateway
-        - SERVICE_NAME: order-service
-        - SERVICE_NAME: product-service
-        - SERVICE_NAME: identity-service
-        - SERVICE_NAME: inventory-service
-        - SERVICE_NAME: notification-service
-  script:
-    - docker login -u $HARBOR_USER -p $HARBOR_PASSWORD $HARBOR_URL
-    - docker push $HARBOR_URL/$HARBOR_DEV_REG/${SERVICE_NAME}:$IMAGE_VERSION 
-  <<: *default_rules
+# push dev backend image:
+#   stage: push dev image
+#   tags:
+#     - runner2-dev-shell 
+#   parallel:
+#       matrix:
+#         - SERVICE_NAME: api-gateway
+#         - SERVICE_NAME: order-service
+#         - SERVICE_NAME: product-service
+#         - SERVICE_NAME: identity-service
+#         - SERVICE_NAME: inventory-service
+#         - SERVICE_NAME: notification-service
+#   script:
+#     - docker login -u $HARBOR_USER -p $HARBOR_PASSWORD $HARBOR_URL
+#     - docker push $HARBOR_URL/$HARBOR_DEV_REG/${SERVICE_NAME}:$IMAGE_VERSION 
+#   <<: *default_rules
 
-push frontend prod image:
+
+build prod frontend image:
+  stage: build prod image
+  tags:
+    - runner2-dev-shell
+  script:
+    - cd frontend
+    - docker build --build-arg API_URL=$API_PROD_URL -t $HARBOR_URL/$HARBOR_PROD_REG/frontend:$CI_COMMIT_TAG .
+  <<: *prod_rules
+
+push prod frontend image:
   stage: push prod image
   tags:
     - runner2-dev-shell 
   script:
-    - export DEV_VERSION=$(cat ~/version.txt)
     - docker login -u $HARBOR_USER -p $HARBOR_PASSWORD $HARBOR_URL
-    - docker pull $HARBOR_URL/$HARBOR_DEV_REG/frontend:$DEV_VERSION
-    - docker tag $HARBOR_URL/$HARBOR_DEV_REG/frontend:$DEV_VERSION $HARBOR_URL/$HARBOR_PROD_REG/frontend:$NUMBER_OF_PIPELINE
-    - docker push $HARBOR_URL/$HARBOR_PROD_REG/frontend:$NUMBER_OF_PIPELINE
+    - docker push $HARBOR_URL/$HARBOR_PROD_REG/${SERVICE_NAME}:$CI_COMMIT_TAG 
   <<: *prod_rules
 
-push backend prod image:
-  stage: push prod image
-  tags:
-    - runner2-dev-shell 
-  parallel:
-      matrix:
-        - SERVICE_NAME: api-gateway
-        - SERVICE_NAME: order-service
-        - SERVICE_NAME: product-service
-        - SERVICE_NAME: identity-service
-        - SERVICE_NAME: inventory-service
-        - SERVICE_NAME: notification-service
-  script:
-    - export DEV_VERSION=$(cat ~/version.txt)
-    - docker login -u $HARBOR_USER -p $HARBOR_PASSWORD $HARBOR_URL
-    - docker pull $HARBOR_URL/$HARBOR_DEV_REG/${SERVICE_NAME}:$DEV_VERSION
-    - docker tag  $HARBOR_URL/$HARBOR_DEV_REG/${SERVICE_NAME}:$DEV_VERSION $HARBOR_URL/$HARBOR_PROD_REG/${SERVICE_NAME}:$NUMBER_OF_PIPELINE
-    - docker push $HARBOR_URL/$HARBOR_PROD_REG/${SERVICE_NAME}:$NUMBER_OF_PIPELINE
-  <<: *prod_rules
+# push prod backend image:
+#   stage: push prod image
+#   tags:
+#     - runner2-dev-shell 
+#   parallel:
+#       matrix:
+#         - SERVICE_NAME: api-gateway
+#         - SERVICE_NAME: order-service
+#         - SERVICE_NAME: product-service
+#         - SERVICE_NAME: identity-service
+#         - SERVICE_NAME: inventory-service
+#         - SERVICE_NAME: notification-service
+#   script:
+#     - export DEV_VERSION=$(cat ~/version.txt)
+#     - docker login -u $HARBOR_USER -p $HARBOR_PASSWORD $HARBOR_URL
+#     - docker pull $HARBOR_URL/$HARBOR_DEV_REG/${SERVICE_NAME}:$DEV_VERSION
+#     - docker tag  $HARBOR_URL/$HARBOR_DEV_REG/${SERVICE_NAME}:$DEV_VERSION $HARBOR_URL/$HARBOR_PROD_REG/${SERVICE_NAME}:$CI_COMMIT_TAG
+#     - docker push $HARBOR_URL/$HARBOR_PROD_REG/${SERVICE_NAME}:$CI_COMMIT_TAG
+#   <<: *prod_rules
