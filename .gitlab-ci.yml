@@ -6,6 +6,7 @@ stages:
   - build dev image
   - scan docker image 
   - push dev image
+  - deploy dev env
   - build prod image
   - push prod image
 
@@ -23,7 +24,7 @@ variables:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
 .prod_rules: &prod_rules
   rules:
-    - if: $CI_COMMIT_TAG && $CI_COMMIT_BRANCH == "main"  
+    - if: $CI_COMMIT_TAG 
 
 # sonarqube-check:
 #   stage: sonarqube-check
@@ -175,6 +176,14 @@ push dev frontend image:
 #     - docker login -u $HARBOR_USER -p $HARBOR_PASSWORD $HARBOR_URL
 #     - docker push $HARBOR_URL/$HARBOR_DEV_REG/${SERVICE_NAME}:$IMAGE_VERSION 
 #   <<: *default_rules
+
+deploy dev frontend :
+  stage: deploy dev env
+  tags:
+    - runner2-dev-shell
+  script:
+    - helm upgrade --install itshop-helm ./itshop-helm --set images.tag=$IMAGE_VERSION 
+  <<: *default_rules
 
 
 build prod frontend image:
