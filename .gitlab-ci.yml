@@ -177,12 +177,12 @@ variables:
 #     - docker push $HARBOR_URL/$HARBOR_DEV_REG/${SERVICE_NAME}:$IMAGE_VERSION 
 #   <<: *default_rules
 
-deploy dev :
+update image dev :
   stage: deploy dev env
   tags:
     - runner2-dev-shell
   script:
-    - sed -i "s/tag:.*/ tag: $IMAGE_VERSION/" itshop-helm/values.yaml
+    - ~/update_tag.sh $IMAGE_VERSION
   <<: *prod_rules 
 
 
@@ -224,10 +224,10 @@ deploy dev :
 #     - docker push $HARBOR_URL/$HARBOR_PROD_REG/${SERVICE_NAME}:$CI_COMMIT_TAG
 #   <<: *prod_rules
 
-deploy prod :
+update image prod :
   stage: deploy prod env
   tags:
     - runner2-dev-shell
   script:
-    - sed -i "s/tag:.*/ tag: $CI_COMMIT_TAG/" itshop-helm/values.yaml
+    - ~/update_tag.sh $CI_COMMIT_TAG
   <<: *prod_rules
