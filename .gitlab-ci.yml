@@ -78,22 +78,22 @@ variables:
 #     - runner2-dev-shell    
 #   <<: *default_rules
 
-# build_frontend:
-#   stage: build dev image
-#   tags:
-#     - runner2-dev-shell
-#   image: docker:latest
-#   services:
-#     - docker:dind
-#   script:
-#     - cd frontend
-#     - docker build --build-arg API_URL=$API_DEV_URL -t $HARBOR_URL/$HARBOR_DEV_REG/frontend:$IMAGE_VERSION .
-#     - echo $IMAGE_VERSION > ~/version.txt  
-#   # artifacts: 
-#   #   paths:
-#   #     - ~/version.txt
-#   #   expire_in: 1 week
-#   <<: *default_rules
+build_frontend:
+  stage: build dev image
+  tags:
+    - runner2-dev-shell
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - cd frontend
+    - docker build --build-arg API_URL=$API_DEV_URL -t $HARBOR_URL/$HARBOR_DEV_REG/frontend:$IMAGE_VERSION .
+    - echo $IMAGE_VERSION > ~/version.txt  
+  # artifacts: 
+  #   paths:
+  #     - ~/version.txt
+  #   expire_in: 1 week
+  <<: *default_rules
 
 # build_backend:
 #   stage: build dev image
@@ -114,20 +114,20 @@ variables:
 #     - docker build -t $HARBOR_URL/$HARBOR_DEV_REG/${SERVICE_NAME}:$IMAGE_VERSION -f ${SERVICE_NAME}/Dockerfile .
 #   <<: *default_rules
 
-# trivy scan image frontend:
-#     stage: scan docker image
-#     variables:
-#         GIT_STRATEGY: none
-#     script:
-#       - trivy image --reset
-#       - trivy image --format template --template '~/html.tpl' -o frontend.html $HARBOR_URL/$HARBOR_DEV_REG/frontend:$IMAGE_VERSION 
-#     tags:
-#         - runner2-dev-shell
-#     artifacts:
-#       paths:
-#         - frontend.html
-#       expire_in: 1 day
-#     <<: *default_rules
+trivy scan image frontend:
+    stage: scan docker image
+    variables:
+        GIT_STRATEGY: none
+    script:
+      - trivy image --reset
+      - trivy image --scanners vuln --format template --template "@/usr/bin/html.tpl" -o frontend.html $HARBOR_URL/$HARBOR_DEV_REG/frontend:$IMAGE_VERSION 
+    tags:
+        - runner2-dev-shell
+    artifacts:
+      paths:
+        - frontend.html
+      expire_in: 1 day
+    <<: *default_rules
 
 # trivy scan image backend:
 #     stage: scan docker image
@@ -142,7 +142,7 @@ variables:
 #         - SERVICE_NAME: inventory-service
 #         - SERVICE_NAME: notification-service      
 #     script:
-#         - trivy image --format template --template '~/html.tpl' -o ${SERVICE_NAME}.html $HARBOR_URL/$HARBOR_DEV_REG/${SERVICE_NAME}:$IMAGE_VERSION 
+#         - trivy image --format template --template "@/usr/bin/html.tpl" -o ${SERVICE_NAME}.html $HARBOR_URL/$HARBOR_DEV_REG/${SERVICE_NAME}:$IMAGE_VERSION 
 #     tags:
 #         - runner2-dev-shell  
 #     artifacts:
@@ -151,14 +151,14 @@ variables:
 #       expire_in: 1 day    
 #     <<: *default_rules
 
-# push dev frontend image:
-#   stage: push dev image
-#   tags:
-#     - runner2-dev-shell 
-#   script:
-#     - docker login -u $HARBOR_USER -p $HARBOR_PASSWORD $HARBOR_URL
-#     - docker push $HARBOR_URL/$HARBOR_DEV_REG/frontend:$IMAGE_VERSION 
-#   <<: *default_rules
+push dev frontend image:
+  stage: push dev image
+  tags:
+    - runner2-dev-shell 
+  script:
+    - docker login -u $HARBOR_USER -p $HARBOR_PASSWORD $HARBOR_URL
+    - docker push $HARBOR_URL/$HARBOR_DEV_REG/frontend:$IMAGE_VERSION 
+  <<: *default_rules
 
 # push dev backend image:
 #   stage: push dev image
