@@ -251,7 +251,7 @@ prod helm package :
       # Set Helm version to a valid semantic version
       export CHART_PATH="./helm-charts/prod/itshop-helm"
       export PACKAGE_PATH="./helm-charts/prod/packages"
-      export HELM_VERSION="$CI_COMMIT_TAG"
+      export HELM_VERSION="0.1.0-$CI_COMMIT_TAG"
       echo "Packaging Helm chart with version $HELM_VERSION"
 
       # Package Helm chart
