@@ -218,6 +218,7 @@ push prod frontend image:
     - docker push $HARBOR_URL/$HARBOR_PROD_REG/${SERVICE_NAME}:$CI_COMMIT_TAG 
   <<: *prod_rules
 
+
 push prod backend image:
   stage: push prod image
   tags:
