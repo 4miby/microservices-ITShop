@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.services.apiGateway.name }}-active
+spec:
+  type: ClusterIP
+  selector:
+    app: {{ .Values.services.apiGateway.name }}
+  ports:
+    - protocol: TCP
+      port: {{ .Values.services.apiGateway.port }}
+      targetPort: {{ .Values.services.apiGateway.port }}
+      name: http
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.services.apiGateway.name }}-preview
+spec:
+  type: ClusterIP
+  selector:
+    app: {{ .Values.services.apiGateway.name }}
+  ports:
+    - protocol: TCP
+      port: {{ .Values.services.apiGateway.port }}
+      targetPort: {{ .Values.services.apiGateway.port }}
+      name: http

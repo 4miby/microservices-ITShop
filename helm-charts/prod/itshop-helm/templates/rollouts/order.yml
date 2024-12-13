@@ -1,0 +1,44 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: {{ .Values.services.orderService.name }}
+spec:
+  replicas: {{ .Values.services.orderService.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.services.orderService.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.services.orderService.name }}
+    spec:
+      containers:
+        - name: {{ .Values.services.orderService.name }}
+          image: "{{ .Values.images.registry }}/{{ .Values.services.orderService.name }}:{{ .Values.images.tag }}"
+          imagePullPolicy: {{ .Values.images.pullPolicy }}
+          env:
+            - name: SPRING_KAFKA_BOOTSTRAP-SERVERS
+              valueFrom:
+                configMapKeyRef:
+                  name: common-config
+                  key: SPRING_KAFKA_BOOTSTRAP-SERVERS
+            - name: SPRING_DATASOURCE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: order-service-config
+                  key: SPRING_DATASOURCE_URL
+            - name: INVENTORY_SERVICE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: common-config
+                  key: INVENTORY_SERVICE_URL
+            - name: SPRING_KAFKA_PRODUCER_PROPERTIES_SCHEMA_REGISTRY_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: order-service-config
+                  key: SPRING_KAFKA_PRODUCER_PROPERTIES_SCHEMA_REGISTRY_URL
+  strategy:
+    blueGreen:
+      activeService: {{ .Values.services.orderService.name }}-active
+      previewService: {{ .Values.services.orderService.name }}-preview
+      autoPromotionEnabled: false

@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.services.inventoryService.name }}
+spec:
+  replicas: {{ .Values.services.inventoryService.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.services.inventoryService.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.services.inventoryService.name }}
+    spec:
+      containers:
+        - name: {{ .Values.services.inventoryService.name }}
+          image: "{{ .Values.images.registry }}/{{ .Values.services.inventoryService.name }}:{{ .Values.images.tag }}"
+          imagePullPolicy: {{ .Values.images.pullPolicy }}
+          env:
+            - name: SPRING_DATASOURCE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: inventory-service-config
+                  key: SPRING_DATASOURCE_URL

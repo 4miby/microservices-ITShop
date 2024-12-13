@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.services.productService.name }}
+spec:
+  replicas: {{ .Values.services.productService.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.services.productService.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.services.productService.name }}
+    spec:
+      containers:
+        - name: {{ .Values.services.productService.name }}
+          image: "{{ .Values.images.registry }}/{{ .Values.services.productService.name }}:{{ .Values.images.tag }}"
+          imagePullPolicy: {{ .Values.images.pullPolicy }}
+          env:
+            - name: SPRING_DATA_MONGODB_URI
+              valueFrom:
+                configMapKeyRef:
+                  name: product-service-config
+                  key: SPRING_DATA_MONGODB_URI
+            - name: INVENTORY_SERVICE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: common-config
+                  key: INVENTORY_SERVICE_URL

@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: {{ .Values.services.identityService.name }}
+spec:
+  replicas: {{ .Values.services.identityService.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.services.identityService.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.services.identityService.name }}
+    spec:
+      containers:
+        - name: {{ .Values.services.identityService.name }}
+          image: "{{ .Values.images.registry }}/{{ .Values.services.identityService.name }}:{{ .Values.images.tag }}"
+          imagePullPolicy: {{ .Values.images.pullPolicy }}
+          env:
+            - name: SPRING_DATASOURCE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: identity-service-config
+                  key: SPRING_DATASOURCE_URL
+  strategy:
+    blueGreen:
+      activeService: {{ .Values.services.identityService.name }}-active
+      previewService: {{ .Values.services.identityService.name }}-preview
+      autoPromotionEnabled: false
