@@ -189,7 +189,7 @@ dev helm package :
       # Set Helm version to a valid semantic version
       export CHART_PATH="./helm-charts/dev/itshop-helm"
       export PACKAGE_PATH="./helm-charts/dev/packages"
-      export HELM_VERSION="0.1.0-$CI_COMMIT_SHORT_SHA"
+      export HELM_VERSION="dev-v$CI_COMMIT_SHORT_SHA"
       echo "Packaging Helm chart with version $HELM_VERSION"
 
       # Package Helm chart
