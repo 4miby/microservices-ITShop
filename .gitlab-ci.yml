@@ -6,10 +6,10 @@ stages:
   - build dev image
   - scan docker image 
   - push dev image
-  - deploy dev env
+  - build and push dev env helm package
   - build prod image
   - push prod image
-  - deploy prod env
+  - build and push prod env helm package
 variables:
   IMAGE_VERSION: $CI_COMMIT_SHORT_SHA
   API_DEV_URL: http://api.gke-dev.dinhcam.tech
@@ -177,12 +177,28 @@ push dev frontend image:
 #     - docker push $HARBOR_URL/$HARBOR_DEV_REG/${SERVICE_NAME}:$IMAGE_VERSION 
 #   <<: *default_rules
 
-update image dev :
-  stage: deploy dev env
+dev helm package :
+  stage: build and push dev env helm package
   tags:
     - runner2-dev-shell
   script:
-    - ~/update_tag.sh $IMAGE_VERSION
+    # Update Image Tags in values.yaml file
+    - TAG=$CI_COMMIT_SHORT_SHA
+    - echo "Using TAG: $TAG"
+    - sed -i "s/^  tag: .*/  tag: $TAG/" ./helm-charts/dev/itshop-helm/values.yaml
+    # Set Helm version and paths
+    - export CHART_PATH="./helm-charts/dev/itshop-helm"
+    - export PACKAGE_PATH="./helm-charts/dev/packages"
+    
+    # Set version to the CI commit hash
+    - export HELM_VERSION="$CI_COMMIT_SHORT_SHA"
+    - echo "Packaging Helm chart with version $HELM_VERSION"
+
+    # Package Helm chart
+    - helm package $CHART_PATH -d $PACKAGE_PATH --version $HELM_VERSION
+
+    # Push Helm chart to Harbor
+    - helm push $PACKAGE_PATH/$(ls $PACKAGE_PATH) $HARBOR_HELM_DEV_REGISTRY
   <<: *default_rules 
 
 
@@ -224,10 +240,26 @@ update image dev :
 #     - docker push $HARBOR_URL/$HARBOR_PROD_REG/${SERVICE_NAME}:$CI_COMMIT_TAG
 #   <<: *prod_rules
 
-update image prod :
-  stage: deploy prod env
+prod helm package :
+  stage: build and push prod env helm package
   tags:
     - runner2-dev-shell
   script:
-    - ~/update_tag.sh $CI_COMMIT_TAG
+    # Update Image Tags in values.yaml file
+    - TAG=$CI_COMMIT_TAG
+    - echo "Using TAG: $TAG"
+    - sed -i "s/^  tag: .*/  tag: $TAG/" ./helm-charts/prod/itshop-helm/values.yaml
+    # Set Helm version and paths
+    - export CHART_PATH="./helm-charts/prod/itshop-helm"
+    - export PACKAGE_PATH="./helm-charts/prod/packages"
+    
+    # Set version to the GitLab release tag
+    - export HELM_VERSION="$CI_COMMIT_TAG"
+    - echo "Packaging Helm chart with version $HELM_VERSION"
+
+    # Package Helm chart
+    - helm package $CHART_PATH -d $PACKAGE_PATH --version $HELM_VERSION
+
+    # Push Helm chart to Harbor
+    - helm push $PACKAGE_PATH/$(ls $PACKAGE_PATH) $HARBOR_HELM_PROD_REGISTRY
   <<: *prod_rules

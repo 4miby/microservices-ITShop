@@ -1,0 +1,34 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: {{ .Values.services.notificationService.name }}
+spec:
+  replicas: {{ .Values.services.notificationService.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.services.notificationService.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.services.notificationService.name }}
+    spec:
+      containers:
+        - name: {{ .Values.services.notificationService.name }}
+          image: "{{ .Values.images.registry }}/{{ .Values.services.notificationService.name }}:{{ .Values.images.tag }}"
+          imagePullPolicy: {{ .Values.images.pullPolicy }}
+          env:
+            - name: SPRING_KAFKA_BOOTSTRAP-SERVERS
+              valueFrom:
+                configMapKeyRef:
+                  name: common-config
+                  key: SPRING_KAFKA_BOOTSTRAP-SERVERS
+            - name: SPRING_KAFKA_CONSUMER_PROPERTIES_SCHEMA_REGISTRY_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: notification-service-config
+                  key: SPRING_KAFKA_CONSUMER_PROPERTIES_SCHEMA_REGISTRY_URL
+  strategy:
+    blueGreen:
+      activeService: {{ .Values.services.notificationService.name }}-active
+      previewService: {{ .Values.services.notificationService.name }}-preview
+      autoPromotionEnabled: false
