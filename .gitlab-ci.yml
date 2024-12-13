@@ -18,7 +18,6 @@ variables:
   NUMBER_OF_PIPELINE: $CI_PIPELINE_ID
   APP_VERSION: 0.1.0
 
-  
 .default_rules: &default_rules
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
