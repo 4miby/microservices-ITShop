@@ -10,9 +10,9 @@ stages:
   - push prod image
   - build and push prod env helm package
 variables:
-  IMAGE_VERSION: $CI_COMMIT_SHORT_SHA
-  API_DEV_URL: http://api.gke-dev.dinhcam.tech
-  API_PROD_URL: http://api.gke-prod.dinhcam.tech
+  IMAGE_VERSION: $APP_VERSION-$CI_COMMIT_SHORT_SHA
+  API_DEV_URL: $API_DEV_URL
+  API_PROD_URL: $API_PROD_URL
   SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  
   GIT_DEPTH: "0"
   NUMBER_OF_PIPELINE: $CI_PIPELINE_ID
@@ -184,8 +184,7 @@ dev helm package :
   script:
     - |
       # Update Image Tags in values.yaml file
-      TAG=$CI_COMMIT_SHORT_SHA
-      sed -i "s/^  tag: .*/  tag: $TAG/" ./helm-charts/dev/itshop-helm/values.yaml
+      sed -i "s/^  tag: .*/  tag: $IMAGE_VERSION/" ./helm-charts/dev/itshop-helm/values.yaml
 
       # Set Helm version to a valid semantic version
       export CHART_PATH="./helm-charts/dev/itshop-helm"
@@ -246,13 +245,12 @@ prod helm package :
   script:
     - |
       # Update Image Tags in values.yaml file
-      TAG=$CI_COMMIT_TAG
-      sed -i "s/^  tag: .*/  tag: $TAG/" ./helm-charts/prod/itshop-helm/values.yaml
+      sed -i "s/^  tag: .*/  tag: $CI_COMMIT_TAG/" ./helm-charts/prod/itshop-helm/values.yaml
 
       # Set Helm version to a valid semantic version
       export CHART_PATH="./helm-charts/prod/itshop-helm"
       export PACKAGE_PATH="./helm-charts/prod/packages"
-      export HELM_VERSION="$APP_VERSION-$CI_COMMIT_TAG"
+      export HELM_VERSION="$CI_COMMIT_TAG"
       echo "Packaging Helm chart with version $HELM_VERSION"
 
       # Package Helm chart
