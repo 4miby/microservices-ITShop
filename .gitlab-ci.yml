@@ -129,6 +129,7 @@ trivy scan image frontend:
       expire_in: 1 day
     <<: *default_rules
 
+
 trivy scan image backend:
     stage: scan docker image
     variables:
