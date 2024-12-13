@@ -16,6 +16,7 @@ variables:
   SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  
   GIT_DEPTH: "0"
   NUMBER_OF_PIPELINE: $CI_PIPELINE_ID
+  APP_VERSION: 0.1.0
 
   
 .default_rules: &default_rules
@@ -251,11 +252,11 @@ prod helm package :
       # Set Helm version to a valid semantic version
       export CHART_PATH="./helm-charts/prod/itshop-helm"
       export PACKAGE_PATH="./helm-charts/prod/packages"
-      export HELM_VERSION="0.1.0-$CI_COMMIT_TAG"
+      export HELM_VERSION="$APP_VERSION-$CI_COMMIT_TAG"
       echo "Packaging Helm chart with version $HELM_VERSION"
 
       # Package Helm chart
-      helm package $CHART_PATH -d $PACKAGE_PATH --version $HELM_VERSION
+      helm package $CHART_PATH -d $PACKAGE_PATH --version $HELM_VERSION --app-version $APP_VERSION
 
       # Push Helm chart to Harbor
       helm cm-push $PACKAGE_PATH/$(ls $PACKAGE_PATH) $HARBOR_HELM_PROD_REGISTRY
