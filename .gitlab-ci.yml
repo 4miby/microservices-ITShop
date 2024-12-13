@@ -26,156 +26,156 @@ variables:
   rules:
     - if: $CI_COMMIT_TAG 
 
-# sonarqube-check:
-#   stage: sonarqube-check
-#   image: maven:3-eclipse-temurin-21
-#   script:
-#     - mvn clean package -DskipTests
-#     - for service in api-gateway identity-service inventory-service notification-service order-service product-service; do
-#         echo "Scanning $service";
-#         cd $service;
-#         mvn sonar:sonar -Dsonar.projectKey="$CI_PROJECT_NAME-$service" -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_TOKEN;
-#         cd ..;
-#       done
-#   allow_failure: true
-#   <<: *default_rules
-#   tags:
-#     - runner2-dev-shell
+sonarqube-check:
+  stage: sonarqube-check
+  image: maven:3-eclipse-temurin-21
+  script:
+    - mvn clean package -DskipTests
+    - for service in api-gateway identity-service inventory-service notification-service order-service product-service; do
+        echo "Scanning $service";
+        cd $service;
+        mvn sonar:sonar -Dsonar.projectKey="$CI_PROJECT_NAME-$service" -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_TOKEN;
+        cd ..;
+      done
+  allow_failure: true
+  <<: *default_rules
+  tags:
+    - runner2-dev-shell
 
-# dependency-check:
-#   stage: dependency-check
-#   parallel:
-#     matrix:
-#       - SERVICE: api-gateway
-#       - SERVICE: identity-service
-#       - SERVICE: inventory-service
-#       - SERVICE: notification-service
-#       - SERVICE: order-service
-#       - SERVICE: product-service
-#   script:
-#     - cd $SERVICE
-#     - mvn org.owasp:dependency-check-maven:check
-#   allow_failure: true
-#   <<: *default_rules
-#   tags:
-#     - runner2-dev-shell
-#   artifacts:
-#     expire_in: 1 day
-#     reports:
-#       sast: $SERVICE/target/dependency-check-report.json
+dependency-check:
+  stage: dependency-check
+  parallel:
+    matrix:
+      - SERVICE: api-gateway
+      - SERVICE: identity-service
+      - SERVICE: inventory-service
+      - SERVICE: notification-service
+      - SERVICE: order-service
+      - SERVICE: product-service
+  script:
+    - cd $SERVICE
+    - mvn org.owasp:dependency-check-maven:check
+  allow_failure: true
+  <<: *default_rules
+  tags:
+    - runner2-dev-shell
+  artifacts:
+    expire_in: 1 day
+    reports:
+      sast: $SERVICE/target/dependency-check-report.json
 
 
-# scan dockerfile:
-#   stage: scan dockerfile
-#   script:
-#     - for service in api-gateway identity-service inventory-service notification-service order-service product-service frontend; do
-#         echo "Scanning Dockerfile from $service";
-#         cd $service;
-#         hadolint Dockerfile;
-#         cd ..;
-#       done
-#   tags: 
-#     - runner2-dev-shell    
-#   <<: *default_rules
+scan dockerfile:
+  stage: scan dockerfile
+  script:
+    - for service in api-gateway identity-service inventory-service notification-service order-service product-service frontend; do
+        echo "Scanning Dockerfile from $service";
+        cd $service;
+        hadolint Dockerfile;
+        cd ..;
+      done
+  tags: 
+    - runner2-dev-shell    
+  <<: *default_rules
 
-# build_frontend:
-#   stage: build dev image
-#   tags:
-#     - runner2-dev-shell
-#   image: docker:latest
-#   services:
-#     - docker:dind
-#   script:
-#     - cd frontend
-#     - docker build --build-arg API_URL=$API_DEV_URL -t $HARBOR_URL/$HARBOR_DEV_REG/frontend:$IMAGE_VERSION .
-#     - echo $IMAGE_VERSION > ~/version.txt  
-#   # artifacts: 
-#   #   paths:
-#   #     - ~/version.txt
-#   #   expire_in: 1 week
-#   <<: *default_rules
+build_frontend:
+  stage: build dev image
+  tags:
+    - runner2-dev-shell
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - cd frontend
+    - docker build --build-arg API_URL=$API_DEV_URL -t $HARBOR_URL/$HARBOR_DEV_REG/frontend:$IMAGE_VERSION .
+    - echo $IMAGE_VERSION > ~/version.txt  
+  # artifacts: 
+  #   paths:
+  #     - ~/version.txt
+  #   expire_in: 1 week
+  <<: *default_rules
 
-# build_backend:
-#   stage: build dev image
-#   tags: 
-#     - runner2-dev-shell 
-#   parallel:
-#     matrix:
-#       - SERVICE_NAME: api-gateway
-#       - SERVICE_NAME: order-service
-#       - SERVICE_NAME: product-service
-#       - SERVICE_NAME: identity-service
-#       - SERVICE_NAME: inventory-service
-#       - SERVICE_NAME: notification-service
-#   image: docker:latest
-#   services:
-#     - docker:dind
-#   script:
-#     - docker build -t $HARBOR_URL/$HARBOR_DEV_REG/${SERVICE_NAME}:$IMAGE_VERSION -f ${SERVICE_NAME}/Dockerfile .
-#   <<: *default_rules
+build_backend:
+  stage: build dev image
+  tags: 
+    - runner2-dev-shell 
+  parallel:
+    matrix:
+      - SERVICE_NAME: api-gateway
+      - SERVICE_NAME: order-service
+      - SERVICE_NAME: product-service
+      - SERVICE_NAME: identity-service
+      - SERVICE_NAME: inventory-service
+      - SERVICE_NAME: notification-service
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - docker build -t $HARBOR_URL/$HARBOR_DEV_REG/${SERVICE_NAME}:$IMAGE_VERSION -f ${SERVICE_NAME}/Dockerfile .
+  <<: *default_rules
 
-# trivy scan image frontend:
-#     stage: scan docker image
-#     variables:
-#         GIT_STRATEGY: none
-#     script:
-#       # - trivy image --reset
-#       - trivy image --scanners vuln --format template --template "@/usr/bin/html.tpl" -o frontend.html $HARBOR_URL/$HARBOR_DEV_REG/frontend:$IMAGE_VERSION 
-#     tags:
-#         - runner2-dev-shell
-#     artifacts:
-#       paths:
-#         - frontend.html
-#       expire_in: 1 day
-#     <<: *default_rules
+trivy scan image frontend:
+    stage: scan docker image
+    variables:
+        GIT_STRATEGY: none
+    script:
+      # - trivy image --reset
+      - trivy image --scanners vuln --format template --template "@/usr/bin/html.tpl" -o frontend.html $HARBOR_URL/$HARBOR_DEV_REG/frontend:$IMAGE_VERSION 
+    tags:
+        - runner2-dev-shell
+    artifacts:
+      paths:
+        - frontend.html
+      expire_in: 1 day
+    <<: *default_rules
 
-# trivy scan image backend:
-#     stage: scan docker image
-#     variables:
-#         GIT_STRATEGY: none
-#     parallel:
-#       matrix:
-#         - SERVICE_NAME: api-gateway
-#         - SERVICE_NAME: order-service
-#         - SERVICE_NAME: product-service
-#         - SERVICE_NAME: identity-service
-#         - SERVICE_NAME: inventory-service
-#         - SERVICE_NAME: notification-service      
-#     script:
-#         - trivy image --format template --template "@/usr/bin/html.tpl" -o ${SERVICE_NAME}.html $HARBOR_URL/$HARBOR_DEV_REG/${SERVICE_NAME}:$IMAGE_VERSION 
-#     tags:
-#         - runner2-dev-shell  
-#     artifacts:
-#       paths:
-#         - ${SERVICE_NAME}.html
-#       expire_in: 1 day    
-#     <<: *default_rules
+trivy scan image backend:
+    stage: scan docker image
+    variables:
+        GIT_STRATEGY: none
+    parallel:
+      matrix:
+        - SERVICE_NAME: api-gateway
+        - SERVICE_NAME: order-service
+        - SERVICE_NAME: product-service
+        - SERVICE_NAME: identity-service
+        - SERVICE_NAME: inventory-service
+        - SERVICE_NAME: notification-service      
+    script:
+        - trivy image --format template --template "@/usr/bin/html.tpl" -o ${SERVICE_NAME}.html $HARBOR_URL/$HARBOR_DEV_REG/${SERVICE_NAME}:$IMAGE_VERSION 
+    tags:
+        - runner2-dev-shell  
+    artifacts:
+      paths:
+        - ${SERVICE_NAME}.html
+      expire_in: 1 day    
+    <<: *default_rules
 
-# push dev frontend image:
-#   stage: push dev image
-#   tags:
-#     - runner2-dev-shell 
-#   script:
-#     - docker login -u $HARBOR_USER -p $HARBOR_PASSWORD $HARBOR_URL
-#     - docker push $HARBOR_URL/$HARBOR_DEV_REG/frontend:$IMAGE_VERSION 
-#   <<: *default_rules
+push dev frontend image:
+  stage: push dev image
+  tags:
+    - runner2-dev-shell 
+  script:
+    - docker login -u $HARBOR_USER -p $HARBOR_PASSWORD $HARBOR_URL
+    - docker push $HARBOR_URL/$HARBOR_DEV_REG/frontend:$IMAGE_VERSION 
+  <<: *default_rules
 
-# push dev backend image:
-#   stage: push dev image
-#   tags:
-#     - runner2-dev-shell 
-#   parallel:
-#       matrix:
-#         - SERVICE_NAME: api-gateway
-#         - SERVICE_NAME: order-service
-#         - SERVICE_NAME: product-service
-#         - SERVICE_NAME: identity-service
-#         - SERVICE_NAME: inventory-service
-#         - SERVICE_NAME: notification-service
-#   script:
-#     - docker login -u $HARBOR_USER -p $HARBOR_PASSWORD $HARBOR_URL
-#     - docker push $HARBOR_URL/$HARBOR_DEV_REG/${SERVICE_NAME}:$IMAGE_VERSION 
-#   <<: *default_rules
+push dev backend image:
+  stage: push dev image
+  tags:
+    - runner2-dev-shell 
+  parallel:
+      matrix:
+        - SERVICE_NAME: api-gateway
+        - SERVICE_NAME: order-service
+        - SERVICE_NAME: product-service
+        - SERVICE_NAME: identity-service
+        - SERVICE_NAME: inventory-service
+        - SERVICE_NAME: notification-service
+  script:
+    - docker login -u $HARBOR_USER -p $HARBOR_PASSWORD $HARBOR_URL
+    - docker push $HARBOR_URL/$HARBOR_DEV_REG/${SERVICE_NAME}:$IMAGE_VERSION 
+  <<: *default_rules
 
 dev helm package :
   stage: build and push dev env helm package
