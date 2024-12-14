@@ -16,6 +16,8 @@ spec:
         - name: {{ .Values.services.notificationService.name }}
           image: "{{ .Values.images.registry }}/{{ .Values.services.notificationService.name }}:{{ .Values.images.tag }}"
           imagePullPolicy: {{ .Values.images.pullPolicy }}
+          imagePullSecrets:
+            - name: {{ .Values.images.pullSecret }}
           env:
             - name: SPRING_KAFKA_BOOTSTRAP-SERVERS
               valueFrom:

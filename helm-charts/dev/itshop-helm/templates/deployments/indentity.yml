@@ -16,6 +16,8 @@ spec:
         - name: {{ .Values.services.identityService.name }}
           image: "{{ .Values.images.registry }}/{{ .Values.services.identityService.name }}:{{ .Values.images.tag }}"
           imagePullPolicy: {{ .Values.images.pullPolicy }}
+          imagePullSecrets:
+            - name: {{ .Values.images.pullSecret }}
           env:
             - name: SPRING_DATASOURCE_URL
               valueFrom:

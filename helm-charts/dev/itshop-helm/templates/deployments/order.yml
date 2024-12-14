@@ -16,6 +16,8 @@ spec:
         - name: {{ .Values.services.orderService.name }}
           image: "{{ .Values.images.registry }}/{{ .Values.services.orderService.name }}:{{ .Values.images.tag }}"
           imagePullPolicy: {{ .Values.images.pullPolicy }}
+          imagePullSecrets:
+            - name: {{ .Values.images.pullSecret }}
           env:
             - name: SPRING_KAFKA_BOOTSTRAP-SERVERS
               valueFrom:

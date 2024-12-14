@@ -16,6 +16,8 @@ spec:
         - name: {{ .Values.services.apiGateway.name }}
           image: "{{ .Values.images.registry }}/{{ .Values.services.apiGateway.name }}:{{ .Values.images.tag }}"
           imagePullPolicy: {{ .Values.images.pullPolicy }}
+          imagePullSecrets:
+            - name: {{ .Values.images.pullSecret }}
           ports:
             - containerPort: {{ .Values.services.apiGateway.port }}
           env:
