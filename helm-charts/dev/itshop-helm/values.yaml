@@ -1,5 +1,5 @@
 global:
-  environment: production
+  environment: development
 
 images:
   registry: harbor.dinhcam.tech/dev-registry
@@ -16,23 +16,23 @@ services:
     port: 80
     replicas: 1
   identityService:
-    name: identity
+    name: identity-service
     port: 8087
     replicas: 1
   inventoryService:
-    name: inventory
+    name: inventory-service
     port: 8082
     replicas: 1
   notificationService:
-    name: notification
+    name: notification-service
     port: 8083
     replicas: 1
   orderService:
-    name: order
+    name: order-service
     port: 8081
     replicas: 1
   productService:
-    name: product
+    name: product-service
     port: 8080
     replicas: 1
 
