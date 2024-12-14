@@ -16,11 +16,11 @@ spec:
         - name: {{ .Values.services.inventoryService.name }}
           image: "{{ .Values.images.registry }}/{{ .Values.services.inventoryService.name }}:{{ .Values.images.tag }}"
           imagePullPolicy: {{ .Values.images.pullPolicy }}
-          imagePullSecrets:
-            - name: {{ .Values.images.pullSecret }}
           env:
             - name: SPRING_DATASOURCE_URL
               valueFrom:
                 configMapKeyRef:
                   name: inventory-service-config
                   key: SPRING_DATASOURCE_URL
+      imagePullSecrets:
+        - name: {{ .Values.images.pullSecret }}                  
