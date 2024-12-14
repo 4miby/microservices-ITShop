@@ -17,23 +17,23 @@ services:
     port: 80
     replicas: 1
   identityService:
-    name: identity-service-service
+    name: identity-service
     port: 8087
     replicas: 1
   inventoryService:
-    name: inventory-service-service
+    name: inventory-service
     port: 8082
     replicas: 1
   notificationService:
-    name: notification-service-service
+    name: notification-service
     port: 8083
     replicas: 1
   orderService:
-    name: order-service-service
+    name: order-service
     port: 8081
     replicas: 1
   productService:
-    name: product-service-service
+    name: product-service
     port: 8080
     replicas: 1
 
