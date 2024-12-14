@@ -16,8 +16,6 @@ spec:
         - name: {{ .Values.services.apiGateway.name }}
           image: "{{ .Values.images.registry }}/{{ .Values.services.apiGateway.name }}:{{ .Values.images.tag }}"
           imagePullPolicy: {{ .Values.images.pullPolicy }}
-          imagePullSecrets:
-            - name: {{ .Values.images.pullSecret }}
           ports:
             - containerPort: {{ .Values.services.apiGateway.port }}
           env:
@@ -41,6 +39,8 @@ spec:
                 configMapKeyRef:
                   name: common-config
                   key: IDENTITY_SERVICE_URL
+      imagePullSecrets:
+            - name: {{ .Values.images.pullSecret }}                  
   strategy:
     blueGreen:
       activeService: {{ .Values.services.apiGateway.name }}-active

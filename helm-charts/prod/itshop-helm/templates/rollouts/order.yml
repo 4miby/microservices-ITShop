@@ -16,8 +16,6 @@ spec:
         - name: {{ .Values.services.orderService.name }}
           image: "{{ .Values.images.registry }}/{{ .Values.services.orderService.name }}:{{ .Values.images.tag }}"
           imagePullPolicy: {{ .Values.images.pullPolicy }}
-          imagePullSecrets:
-            - name: {{ .Values.images.pullSecret }}
           env:
             - name: SPRING_KAFKA_BOOTSTRAP-SERVERS
               valueFrom:
@@ -39,6 +37,8 @@ spec:
                 configMapKeyRef:
                   name: order-service-config
                   key: SPRING_KAFKA_PRODUCER_PROPERTIES_SCHEMA_REGISTRY_URL
+      imagePullSecrets:
+            - name: {{ .Values.images.pullSecret }}                  
   strategy:
     blueGreen:
       activeService: {{ .Values.services.orderService.name }}-active

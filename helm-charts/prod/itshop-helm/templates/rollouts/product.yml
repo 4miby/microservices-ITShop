@@ -16,8 +16,6 @@ spec:
         - name: {{ .Values.services.productService.name }}
           image: "{{ .Values.images.registry }}/{{ .Values.services.productService.name }}:{{ .Values.images.tag }}"
           imagePullPolicy: {{ .Values.images.pullPolicy }}
-          imagePullSecrets:
-            - name: {{ .Values.images.pullSecret }}
           env:
             - name: SPRING_DATA_MONGODB_URI
               valueFrom:
@@ -29,6 +27,8 @@ spec:
                 configMapKeyRef:
                   name: common-config
                   key: INVENTORY_SERVICE_URL
+      imagePullSecrets:
+            - name: {{ .Values.images.pullSecret }}                  
   strategy:
     blueGreen:
       activeService: {{ .Values.services.productService.name }}-active
