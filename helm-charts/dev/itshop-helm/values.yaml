@@ -1,5 +1,5 @@
 global:
-  environment: production
+  environment: development
 
 images:
   registry: harbor.dinhcam.tech/dev-registry
