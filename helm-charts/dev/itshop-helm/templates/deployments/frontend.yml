@@ -16,5 +16,7 @@ spec:
         - name: {{ .Values.services.frontend.name }}
           image: "{{ .Values.images.registry }}/{{ .Values.services.frontend.name }}:{{ .Values.images.tag }}"
           imagePullPolicy: {{ .Values.images.pullPolicy }}
+          imagePullSecrets:
+            - name: {{ .Values.images.pullSecret }}
           ports:
             - containerPort: {{ .Values.services.frontend.port }}

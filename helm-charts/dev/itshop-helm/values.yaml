@@ -5,6 +5,7 @@ images:
   registry: harbor.dinhcam.tech/dev-registry
   pullPolicy: IfNotPresent
   tag: b3ea2db7
+  pullSecret: harbor-dev-registry-secret
 
 services:
   apiGateway:
