@@ -56,6 +56,3 @@ config:
   orderService:
     SPRING_DATASOURCE_URL: "jdbc:mysql://mysql.app.svc.cluster.local:3306/order_service"
     SPRING_KAFKA_PRODUCER_PROPERTIES_SCHEMA_REGISTRY_URL: "http://schema-registry.app.svc.cluster.local:8081"
-  
-  productService:
-    SPRING_DATA_MONGODB_URI: "mongodb://root:password@mongodb.app.svc.cluster.local:27017/product-service?authSource=admin"

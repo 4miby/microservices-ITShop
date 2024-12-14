@@ -1,6 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: product-service-config
-data:
-  {{- toYaml .Values.config.productService | nindent 2 }}

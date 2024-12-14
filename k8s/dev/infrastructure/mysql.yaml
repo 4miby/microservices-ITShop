@@ -23,8 +23,8 @@ spec:
             - name: MYSQL_ROOT_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  key: mysql_root_password
-                  name: mysql-secrets
+                  key: MYSQL_ROOT_PASSWORD
+                  name: mysql-env-secrets
           volumeMounts:
             - mountPath: /var/lib/mysql
               name: mysql-data
@@ -53,13 +53,6 @@ spec:
     app: mysql
 ---
 apiVersion: v1
-data:
-  mysql_root_password: bXlzcWw=
-kind: Secret
-metadata:
-  name: mysql-secrets
----
-apiVersion: v1
 kind: PersistentVolume
 metadata:
     name: mysql-pv
@@ -69,8 +62,9 @@ spec:
     - ReadWriteOnce
   capacity:
     storage: 1Gi
-  hostPath:
-    path: /data/mysql
+  gcePersistentDisk:
+    pdName: mysql-disk-dev
+    fsType: ext4
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
