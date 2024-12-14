@@ -40,7 +40,7 @@ spec:
                   name: common-config
                   key: IDENTITY_SERVICE_URL
       imagePullSecrets:
-            - name: {{ .Values.images.pullSecret }}                  
+        - name: {{ .Values.images.pullSecret }}                  
   strategy:
     blueGreen:
       activeService: {{ .Values.services.apiGateway.name }}-active

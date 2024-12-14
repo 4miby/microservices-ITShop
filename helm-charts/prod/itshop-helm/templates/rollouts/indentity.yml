@@ -23,7 +23,7 @@ spec:
                   name: identity-service-config
                   key: SPRING_DATASOURCE_URL
       imagePullSecrets:
-            - name: {{ .Values.images.pullSecret }}                  
+        - name: {{ .Values.images.pullSecret }}                  
   strategy:
     blueGreen:
       activeService: {{ .Values.services.identityService.name }}-active

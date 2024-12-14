@@ -28,7 +28,7 @@ spec:
                   name: notification-service-config
                   key: SPRING_KAFKA_CONSUMER_PROPERTIES_SCHEMA_REGISTRY_URL
       imagePullSecrets:
-            - name: {{ .Values.images.pullSecret }}                  
+        - name: {{ .Values.images.pullSecret }}                  
   strategy:
     blueGreen:
       activeService: {{ .Values.services.notificationService.name }}-active

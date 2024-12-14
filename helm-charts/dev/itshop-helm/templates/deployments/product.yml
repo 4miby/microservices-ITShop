@@ -28,4 +28,4 @@ spec:
                   name: common-config
                   key: INVENTORY_SERVICE_URL
       imagePullSecrets:
-            - name: {{ .Values.images.pullSecret }}
+        - name: {{ .Values.images.pullSecret }}
