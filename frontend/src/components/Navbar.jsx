@@ -39,7 +39,7 @@ const Navbar = () => {
                     <span className="text-3xl text-indigo-600 mr-1 pt-2">
                         <ion-icon name="laptop-outline"></ion-icon>
                     </span>
-                    IT Shop
+                    IT Shop v0.2.7
                 </div>
                 <div onClick={()=>setOpen(!open)} className="text-3xl absolute right-8 top-6 cursor-pointer md:hidden">
                     <ion-icon name={open ? 'close':'menu'}></ion-icon>

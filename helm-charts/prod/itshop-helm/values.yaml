@@ -39,11 +39,11 @@ services:
 
 config:
   common:
-    PRODUCT_SERVICE_URL: "http://product-service.app.svc.cluster.local:8080"
-    ORDER_SERVICE_URL: "http://order-service.app.svc.cluster.local:8081"
-    INVENTORY_SERVICE_URL: "http://inventory-service.app.svc.cluster.local:8082"
+    PRODUCT_SERVICE_URL: "http://product-service-service.app.svc.cluster.local:8080"
+    ORDER_SERVICE_URL: "http://order-service-service.app.svc.cluster.local:8081"
+    INVENTORY_SERVICE_URL: "http://inventory-service-service.app.svc.cluster.local:8082"
     SPRING_KAFKA_BOOTSTRAP-SERVERS: "broker.app.svc.cluster.local:29092"
-    IDENTITY_SERVICE_URL: "http://identity-service.app.svc.cluster.local:8087"
+    IDENTITY_SERVICE_URL: "http://identity-service-service.app.svc.cluster.local:8087"
   
   identityService:
     SPRING_DATASOURCE_URL: "jdbc:mysql://mysql.app.svc.cluster.local:3306/identity_service"
