@@ -69,7 +69,7 @@ const Navbar = () => {
                                 <span>{user.username}</span>
                             </button>
 
-                            {/* Dropdown Menu */}
+                            {/*Dropdown Menu*/}
                             {dropdownOpen && (
                                 <div className={`absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50
                                     ${open ? 'relative w-full md:absolute md:w-48' : ''}`}>
